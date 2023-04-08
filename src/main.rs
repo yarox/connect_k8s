@@ -17,7 +17,7 @@ impl fmt::Display for CommandResultChoice {
             .iter()
             .sorted_by_key(|x| x.0.parse::<u32>().unwrap())
         {
-            write!(f, "{:>width$}. {}\n", i, line, width = width)
+            writeln!(f, "{:>width$}. {}", i, line, width = width)
                 .expect("Something went wrong while displaying CommandResultChoice");
         }
 
@@ -26,7 +26,7 @@ impl fmt::Display for CommandResultChoice {
 }
 
 impl CommandResultChoice {
-    fn new(content: &Vec<&str>) -> Self {
+    fn new(content: &[&str]) -> Self {
         let mut choices = HashMap::new();
 
         for (i, line) in content.iter().enumerate() {
@@ -67,7 +67,7 @@ fn main() {
     // Select the context
     let output = Command::new("kubectx").output().unwrap();
     let content = String::from_utf8(output.stdout).unwrap();
-    let content = content.trim().split("\n").collect_vec();
+    let content = content.trim().split('\n').collect_vec();
 
     let context_list = CommandResultChoice::new(&content);
     let context = context_list.select("Select the cluster to connect to: ");
@@ -90,8 +90,8 @@ fn main() {
         .output()
         .unwrap();
 
-    let content = String::from_utf8(output.stdout).unwrap().replace("'", "");
-    let content = content.trim().split(" ").into_iter().unique().collect_vec();
+    let content = String::from_utf8(output.stdout).unwrap().replace('\'', "");
+    let content = content.trim().split(' ').unique().collect_vec();
 
     let reviewapp_list = CommandResultChoice::new(&content);
     let reviewapp = reviewapp_list.select("Select the review app to connect to: ");
@@ -114,7 +114,7 @@ fn main() {
     let content = String::from_utf8(output.stdout)
         .unwrap()
         .replace("pod/", "");
-    let content = content.trim().split("\n").collect_vec();
+    let content = content.trim().split('\n').collect_vec();
 
     let container_list = CommandResultChoice::new(&content);
     let container = container_list.select("Select the container to connect to: ");
