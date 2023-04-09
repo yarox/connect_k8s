@@ -1,3 +1,4 @@
+use inquire::error::InquireResult;
 use inquire::ui::{IndexPrefix, RenderConfig};
 use inquire::Select;
 use itertools::Itertools;
@@ -9,7 +10,7 @@ fn filter_with_index(filter: &str, _: &&str, string_value: &str, index: usize) -
     (index + 1).to_string().contains(&filter) || string_value.to_lowercase().contains(&filter)
 }
 
-fn main() {
+fn main() -> InquireResult<()> {
     // Configure inquire crate
     let render_config = RenderConfig::default().with_option_index_prefix(IndexPrefix::SpacePadded);
     inquire::set_global_render_config(render_config);
@@ -20,15 +21,13 @@ fn main() {
     let content = content.trim().split('\n').collect_vec();
     let context = Select::new("Select the cluster:", content)
         .with_filter(&filter_with_index)
-        .prompt()
-        .expect("There was an error, please try again");
+        .prompt()?;
 
     // Select the namespace
     let content = vec!["domestika", "frontend"];
     let namespace = Select::new("Select the namespace:", content)
         .with_filter(&filter_with_index)
-        .prompt()
-        .expect("There was an error, please try again");
+        .prompt()?;
 
     // Select the reviewapp
     let output = Command::new("kubectl")
@@ -48,8 +47,7 @@ fn main() {
     let reviewapp = Select::new("Select the review app:", content)
         .with_filter(&filter_with_index)
         .with_page_size(15)
-        .prompt()
-        .expect("There was an error, please try again");
+        .prompt()?;
 
     // Select the container
     let output = Command::new("kubectl")
@@ -73,8 +71,7 @@ fn main() {
     let container = Select::new("Select the container:", content)
         .with_filter(&filter_with_index)
         .with_page_size(10)
-        .prompt()
-        .expect("There was an error, please try again");
+        .prompt()?;
 
     // Enter the container
     println!("Connecting...");
@@ -94,4 +91,6 @@ fn main() {
         .expect("Command failed to start")
         .wait()
         .expect("Something wrong happened while waiting for command to finninsh");
+
+    Ok(())
 }
